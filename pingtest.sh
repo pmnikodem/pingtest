@@ -24,11 +24,13 @@ function pingtest()
 		$FPING -c3 $TARGET &>/dev/null
 		# if reconnect succeeded, log to file and record length of outage:
 		if [ $? = 0 ]; then
+			if [ ! `grep -i succeeded $RESFILE` ]; then
+				$PRINTF "`date -d @$TIMESTAMP`" >> $LOGFILE
+				let "TIMEDIFF = $TIMESTAMP - $LASTCHANGE"
+				$PRINTF ' - reconnected after %s seconds\n' $TIMEDIFF >> $LOGFILE
+			fi
 			echo 'succeeded' > $RESFILE
 			echo $TIMESTAMP >> $RESFILE
-			$PRINTF "`date -d @$TIMESTAMP`" >> $LOGFILE
-			let "TIMEDIFF = $TIMESTAMP - $LASTCHANGE"
-			$PRINTF ' - reconnected after %s seconds\n' $TIMEDIFF >> $LOGFILE
 		fi
 	elif [ $? != 0 ]; then
 		# if last result was succeeded, test whether we are still OK:

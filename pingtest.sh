@@ -2,8 +2,8 @@
 
 set -e
 TARGETFILE=targets
-FPING=`which fping` &&
-TRACEROUTE=`which traceroute` &&
+FPING=`which fping`
+TRACEROUTE=`which traceroute`
 PRINTF=`which printf`
 
 function pingtest()

@@ -5,6 +5,7 @@ TARGETFILE=targets
 FPING=`which fping`
 TRACEROUTE=`which traceroute`
 PRINTF=`which printf`
+set +e
 
 function pingtest()
 {

@@ -21,7 +21,7 @@ function pingtest()
 
 	if [ $? = 0 ]; then
 		# if last result was failed, attempt to reconnect:
-		$FPING -c3 $TARGET &>/dev/null
+		$FPING -c5 -p200 $TARGET &>/dev/null
 		# if reconnect succeeded, log to file and record length of outage:
 		if [ $? = 0 ]; then
 			if [ ! `grep -i succeeded $RESFILE` ]; then
@@ -34,7 +34,7 @@ function pingtest()
 		fi
 	elif [ $? != 0 ]; then
 		# if last result was succeeded, test whether we are still OK:
-		$FPING -c3 $TARGET &>/dev/null
+		$FPING -c5 -p200 $TARGET &>/dev/null
 		# if current test failed, log to file and record timestamp of initial failure:
 		if [ $? != 0 ]; then
 			echo 'failed' > $RESFILE
@@ -57,5 +57,5 @@ do
 	do
 		pingtest $TARGET &
 	done < $TARGETFILE
-	sleep 5
+	sleep 3
 done

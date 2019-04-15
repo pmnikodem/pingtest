@@ -1,8 +1,19 @@
 #!/bin/bash
 
+if [ $# -eq 0 ]; then
+	TIMEOUT=200
+else
+	TIMEOUT=$1
+fi
+
+case $TIMEOUT in
+	''|*[!0-9]*) echo Error: timeout must be integer; exit 1 ;;
+	*) ;;
+esac
+
 set -e
 TARGETFILE=targets
-FPING=`which fping`
+FPING="`which fping` -q -t $TIMEOUT -p100 -c5"
 TRACEROUTE=`which traceroute`
 PRINTF=`which printf`
 set +e
@@ -21,7 +32,8 @@ function pingtest()
 
 	if [ $? = 0 ]; then
 		# if last result was failed, attempt to reconnect:
-		$FPING -c5 -p200 $TARGET &>/dev/null
+		$FPING $TARGET
+		#$FPING -q -t $TIMEOUT -p100 -c5 $TARGET &>/dev/null
 		# if reconnect succeeded, log to file and record length of outage:
 		if [ $? = 0 ]; then
 			if [ ! `grep -i succeeded $RESFILE` ]; then
@@ -34,7 +46,8 @@ function pingtest()
 		fi
 	elif [ $? != 0 ]; then
 		# if last result was succeeded, test whether we are still OK:
-		$FPING -c5 -p200 $TARGET &>/dev/null
+		$FPING $TARGET
+		#$FPING -q -t $TIMEOUT -p100 -c5 $TARGET &>/dev/null
 		# if current test failed, log to file and record timestamp of initial failure:
 		if [ $? != 0 ]; then
 			echo 'failed' > $RESFILE
@@ -57,5 +70,5 @@ do
 	do
 		pingtest $TARGET &
 	done < $TARGETFILE
-	sleep 3
+	sleep 5
 done

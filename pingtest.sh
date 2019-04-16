@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-	TIMEOUT=200
+	TIMEOUT=10
 else
 	TIMEOUT=$1
 fi
@@ -13,13 +13,16 @@ esac
 
 set -e
 TARGETFILE=targets
-FPING="`which fping` -q -t $TIMEOUT -p100 -c5"
-TRACEROUTE=`which traceroute`
+FPING="`which fping` -q -t $TIMEOUT -p200 -c5"
+TRACEROUTE="`which mtr` -w -c15 -b"
 PRINTF=`which printf`
 set +e
 
 function pingtest()
 {
+	{
+	flock -n 99 || { exit 1; }
+
 	TARGET=$1
 	LOGFILE=logs/$TARGET.log
 	RESFILE=logs/$TARGET-result.txt
@@ -55,11 +58,13 @@ function pingtest()
 			$PRINTF ' - lost connection to %s\n' $TARGET >> $LOGFILE
 			$PRINTF '=%.0s' {1..70} >> $LOGFILE
 			$PRINTF '\n' >> $LOGFILE
-			$TRACEROUTE -I $TARGET -m12 -I >> $LOGFILE
+			$TRACEROUTE $TARGET >> $LOGFILE
 			$PRINTF '=%.0s' {1..70} >> $LOGFILE
 			$PRINTF '\n' >> $LOGFILE
 		fi
 	fi
+
+	} 99>.lock/$TARGET.lock
 }
 
 while true

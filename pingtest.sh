@@ -13,13 +13,16 @@ esac
 
 set -e
 TARGETFILE=targets
-FPING="`which fping` -q -t $TIMEOUT -p100 -c5"
+FPING="`which fping` -q -t $TIMEOUT -p200 -c5"
 TRACEROUTE=`which traceroute`
 PRINTF=`which printf`
 set +e
 
 function pingtest()
 {
+	{
+	flock -n 99 || { exit 1; }
+
 	TARGET=$1
 	LOGFILE=logs/$TARGET.log
 	RESFILE=logs/$TARGET-result.txt
@@ -32,7 +35,7 @@ function pingtest()
 
 	if [ $? = 0 ]; then
 		# if last result was failed, attempt to reconnect:
-		$FPING $TARGET &>/dev/null
+		$FPING $TARGET #&>/dev/null
 		# if reconnect succeeded, log to file and record length of outage:
 		if [ $? = 0 ]; then
 			if [ ! `grep -i succeeded $RESFILE` ]; then
@@ -45,7 +48,7 @@ function pingtest()
 		fi
 	elif [ $? != 0 ]; then
 		# if last result was succeeded, test whether we are still OK:
-		$FPING $TARGET &>/dev/null
+		$FPING $TARGET #&>/dev/null
 		# if current test failed, log to file and record timestamp of initial failure:
 		if [ $? != 0 ]; then
 			echo 'failed' > $RESFILE
@@ -60,6 +63,8 @@ function pingtest()
 			$PRINTF '\n' >> $LOGFILE
 		fi
 	fi
+
+	} 99>.lock/$TARGET.lock
 }
 
 while true

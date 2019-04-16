@@ -1,7 +1,7 @@
 #!/bin/bash
 
 if [ $# -eq 0 ]; then
-	TIMEOUT=200
+	TIMEOUT=10
 else
 	TIMEOUT=$1
 fi
@@ -14,7 +14,7 @@ esac
 set -e
 TARGETFILE=targets
 FPING="`which fping` -q -t $TIMEOUT -p200 -c5"
-TRACEROUTE="`which traceroute` -I -m12"
+TRACEROUTE="`which mtr` -w -c15 -b"
 PRINTF=`which printf`
 set +e
 

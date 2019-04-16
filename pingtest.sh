@@ -14,7 +14,7 @@ esac
 set -e
 TARGETFILE=targets
 FPING="`which fping` -q -t $TIMEOUT -p200 -c5"
-TRACEROUTE=`which traceroute`
+TRACEROUTE="`which traceroute` -I -m12"
 PRINTF=`which printf`
 set +e
 
@@ -58,7 +58,7 @@ function pingtest()
 			$PRINTF ' - lost connection to %s\n' $TARGET >> $LOGFILE
 			$PRINTF '=%.0s' {1..70} >> $LOGFILE
 			$PRINTF '\n' >> $LOGFILE
-			$TRACEROUTE -I $TARGET -m12 -I >> $LOGFILE
+			$TRACEROUTE $TARGET >> $LOGFILE
 			$PRINTF '=%.0s' {1..70} >> $LOGFILE
 			$PRINTF '\n' >> $LOGFILE
 		fi
